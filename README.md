@@ -1,45 +1,324 @@
-BagVolley
-Version 2.0.0 | Author Soliserio | MIT License
-Purpose
-Clear space in main Inventory by moving only items actually present that match your editable routing lists. Unlisted items stay put. This is not a drop/sell tool and does not indiscriminately empty your inventory.
-Requirements and coexistence
-Requires Windower 4. Group commands additionally require Send. Itemizer is NOT required for BagVolley sorting. You may keep Itemizer for its item retrieval, ninja tools, stacking and one-off transfer commands. BagVolley does not disable Itemizer or claim its commands. Avoid simultaneous inventory movement by Itemizer, GearSwap, other addons or manual actions while a BagVolley run is active, since concurrent changes affect confirmation.
-Installation and updates
-Copy addons/bagvolley into Windower/addons/. Copy scripts/SortBags.txt and scripts/SortBagsAll.txt into Windower/scripts/. For a FIRST installation, copy the six scripts/store_*.txt default lists too. For an UPDATE, keep your customized store_*.txt files; do not overwrite them unless you deliberately want to replace your routes with these defaults. Back up your existing addon and lists before installation. With sorting stopped, load/reload locally: //lua reload bagvolley Group reload, once from one character: //send @all lua reload bagvolley Installation alone does not move items or clear lists.
-Quick start commands
+# BagVolley
+
+**Version 2.0.0 · Author: Soliserio · MIT License**
+
+BagVolley frees main Inventory space by moving matching items into configurable storage bags.
+
+It scans the items you actually have, matches them against your sorting lists, and queues only the transfers needed. Missing items are silently ignored.
+
+**Itemizer is not required for BagVolley sorting.** You can keep Itemizer installed for its separate retrieval and item-management features.
+
+## Features
+
+- Inventory-first sorting without commands or delays for absent items.
+- Editable item lists and destinations.
+- Solo and all-character macros.
+- Preview, status, and cancellation commands.
+- Bag-access and capacity checks.
+- Protection for equipped, bazaar, and other locked items.
+- Transfer confirmation before continuing.
+- Optional sorting-list clearing with backups and confirmation.
+
+BagVolley does not drop, sell, or indiscriminately empty your inventory. Unlisted items stay where they are.
+
+## Requirements
+
+- Windower 4.
+- The **Send** addon for all-character commands.
+
+Avoid running other inventory movers or manually moving items while BagVolley is sorting.
+
+## Installation
+
+1. Copy the `addons/bagvolley` folder into your Windower `addons` folder.
+2. Copy `SortBags.txt` and `SortBagsAll.txt` into your Windower `scripts` folder.
+3. For a first installation, copy the six supplied sorting lists into your Windower `scripts` folder:
+
+   - `store_satchel.txt`
+   - `store_sack.txt`
+   - `store_case.txt`
+   - `store_mogsafe.txt`
+   - `store_mogsafe2.txt`
+   - `store_storage.txt`
+
+4. Load the addon:
+
+   ```text
+   //lua load bagvolley
+   ```
+
+### Updating an existing installation
+
+Back up your addon and sorting lists first.
+
+Replace the addon files and launchers as needed, but **keep your customized sorting lists** unless you deliberately want to restore the supplied defaults.
+
+With sorting stopped, reload:
+
+```text
+//lua reload bagvolley
+```
+
+For all connected characters:
+
+```text
+//send @all lua reload bagvolley
+```
+
+Loading or reloading does not start transfers.
+
+## Quick Start
+
+Stand idle and close all menus.
+
+### 1. Preview
+
+```text
 //bagvolley preview
+```
+
+Preview reports queued transfers, blocked items, and protected stacks. It does not move anything.
+
+### 2. Start
+
+```text
 //bagvolley start
+```
+
+Start builds a fresh plan from your current inventory and sorting lists. If either changed after preview, preview again first.
+
+### 3. Check status
+
+```text
 //bagvolley status
+```
+
+### 4. Cancel
+
+```text
 //bagvolley cancel
-Preview sends no moves. Start runs the CURRENT lists and CURRENT inventory snapshot, so preview again if you change items or rules before starting. Remain standing idle with menus closed. Resting, combat, menus, zoning and logout stop or block sorting. Cancellation stops future moves; a dispatched move may still finish. A pending/uncertain move imposes a restart cooldown.
-Macros and group commands
-Solo: /console exec SortBags.txt
-Group: /console exec SortBagsAll.txt
-Run the group macro ONCE from one character. Send addresses all connected clients, not a hard-coded roster of eight.
-Group preview: //send @all bagvolley preview
-Group start: //send @all bagvolley start
-Group cancel: //send @all bagvolley cancel
-Customize sorting lists
-The supplied defaults preserve Soliserio's existing setup. Edit these plain text files while all clients are finished sorting: store_satchel.txt, store_sack.txt, store_case.txt, store_mogsafe.txt, store_mogsafe2.txt, store_storage.txt. All six files must exist; empty files are allowed. Their order is the order above. Their filenames do not restrict the destination of individual rules. Examples:
+```
+
+Cancellation stops future transfers. A transfer already dispatched may still finish.
+
+## In-Game Macros
+
+### Solo
+
+Put this line in a macro:
+
+```text
+/console exec SortBags.txt
+```
+
+### All connected characters
+
+Put this line in a macro and run it once from one character:
+
+```text
+/console exec SortBagsAll.txt
+```
+
+The group launcher uses Send and targets all connected clients. It is not limited to a fixed roster of eight.
+
+Each character checks its own inventory, status, bag access, and capacity.
+
+## Direct Group Commands
+
+### Preview everyone
+
+```text
+//send @all bagvolley preview
+```
+
+### Start everyone
+
+```text
+//send @all bagvolley start
+```
+
+### Cancel everyone
+
+```text
+//send @all bagvolley cancel
+```
+
+## Customize Your Sorting Lists
+
+The supplied lists preserve Soliserio’s setup as a starting point. Edit them to choose which items belong in each bag.
+
+Stop sorting on all clients before editing shared lists.
+
+All six files must exist, but empty files are allowed. Their filenames do not restrict the destinations you can use inside them.
+
+### Move from Inventory into a bag
+
+```text
 put "Eye Drops" case all
+```
+
+### Retrieve from a bag into Inventory
+
+```text
 get "Eye Drops" case 1
+```
+
+### Move between bags
+
+```text
 move "Eye Drops" case sack all
+```
+
+### Move back into Inventory
+
+```text
 move "Eye Drops" case inventory 1
+```
+
+### Add a delay
+
+```text
 wait 1
--- A comment
-put moves Inventory -> named bag. get moves named bag -> Inventory. move requires explicit source AND destination. Use all or a positive quantity. Bag API names include inventory, safe, safe2, storage, satchel, sack, case. The temporary bag and same-source/destination moves are rejected. Quoted names required; wildcard * and ? accepted. Prefer exact names. Semicolons and arbitrary script commands are rejected before any moves. Waits are whole seconds from 1 through 60. A wait following a rule supplies its post-transfer delay, at least one second, only after an actual move. Absent items do NOT cause errors or per-rule waiting. First matching rule wins for each source stack. Conflicting later rules do not bounce that stack elsewhere. New arrivals wait for the next sorting run. Normal put lists scan main Inventory. Explicit get/move rules scan their specified source bags too. Each client uses its own installation's lists.
-Clear sorting lists only
-With sorting stopped on ALL clients, run on ONE client only:
-//bagvolley clear
-//bagvolley clear confirm
-Confirm within 30 seconds. This backs up all six list files beside their originals with unique before_clear names, then empties the LIST FILES ONLY. No items move, drop, sell or disappear. Do not broadcast this command: characters using the same installation share these files. Running snapshots on other clients are not cancelled by changing files. Write permission is required. To restore, stop sorting everywhere and copy each desired backup over its matching original. This command was NOT run on the supplied lists.
-Safety and results
-Checks actual bag access, including Mog Safe, Mog Safe 2 and Storage, before planning and again before dispatch. Inaccessible or full destinations are skipped; missing items are quiet. Full sources may still be emptied. Equipped, bazaar and other nonzero-status items are protected. Slot item ID, count and extdata are rechecked immediately before requesting a move. Only one transfer is outstanding at a time. Matching source and destination count changes must confirm it; timeout stops without automatic retry. Completion reports confirmed transfers and individual item quantities, skipped transfers, and protected stacks. It is not a promise every item fit. Full destinations are conservatively skipped even if partial-stack capacity may exist. Confirmation is based on bag counts, not server transaction IDs.
-Display order
-Use the GAME'S Sort -> Auto manually after transfers if desired. Native stack cleanup did not reorder the displayed Mog Case list in testing, so the experimental organize/tidycase command was removed. No alphabetical sorting or automatic menu control is provided.
-Testing
-User-confirmed live: single Eye Drops transfer, three-stack/93-item transfer, Storage blocked outside and successful inside Mog House, and successful transfers on all eight characters. Resting characters were correctly blocked. Kogawolf's earlier block remains unexplained; status subsequently showed idle, menus closed and logged in, and his retry succeeded with safeguards intact. Offline Lua 5.1 tests: parser, inventory-first queue, quantities, wildcards, conflicting rules, equipped protection, bag-access/capacity checks, stale slot/augment changes, transfer failure/timeout, and confirmation behavior. List clearing/backups tested with disposable files, not the user's live lists. Not every item, bag type, timing condition or configuration has been tested.
-Changes in version 2 0 0
-Independent transfer engine; no Itemizer dependency for sorting. Inventory-first planning removes absent-item command spam and delays. Retained existing editable lists, solo/group macros, preview, status, cancel, and optional backed-up list clearing. Added precise idle/menu diagnostics.
-Attribution and license
-BagVolley code author: Soliserio. Itemizer is a separate addon and is not bundled. No Itemizer source is included in this release. Public API references: https://github.com/Windower/Lua/wiki/FFXI-Functions Licensed under the MIT License. Copyright (c) 2026 Soliserio. See the included LICENSE file for permissions, conditions and disclaimers. Nothing in this package implies endorsement by Windower or Itemizer authors.
+```
+
+### Add a comment
+
+```text
+-- Medicines stored in Mog Case
+```
+
+### Supported bag names
+
+| In-game bag | Rule name |
+|---|---|
+| Inventory | `inventory` |
+| Mog Safe | `safe` |
+| Mog Safe 2 | `safe2` |
+| Storage | `storage` |
+| Mog Satchel | `satchel` |
+| Mog Sack | `sack` |
+| Mog Case | `case` |
+
+### Rule behavior
+
+- Quote item names.
+- Use `all` or a positive item count.
+- Prefer exact item names; `*` and `?` wildcards are supported.
+- The first matching rule wins for each stack.
+- Conflicting later rules do not move the same stack again during that run.
+- New arrivals are handled on the next run.
+- Normal `put` lists scan main Inventory.
+- Explicit `get` and `move` rules can scan other source bags.
+- Waits accept whole seconds from 1 through 60 and apply after actual transfers, not absent items.
+- Temporary-bag moves, same-source-and-destination moves, semicolons, and arbitrary script commands are rejected.
+
+Characters using the same Windower installation share its list files. Separate installations use their own copies.
+
+## Clear Sorting Lists Only
+
+This feature is for starting with blank routing lists.
+
+**It does not move, drop, sell, or delete any game items.**
+
+1. Stop sorting on every character.
+2. Run this on **one character only**:
+
+   ```text
+   //bagvolley clear
+   ```
+
+3. Confirm within 30 seconds:
+
+   ```text
+   //bagvolley clear confirm
+   ```
+
+BagVolley backs up all six lists before emptying them.
+
+Do not broadcast this command: characters on the same installation share the files. Write permission is required.
+
+To restore a list, stop sorting everywhere and copy its saved backup over the matching list file.
+
+## Safety Checks
+
+BagVolley checks bag access and capacity before planning and again before sending a transfer.
+
+- Inaccessible or full destinations are skipped.
+- Mog Safe, Mog Safe 2, and Storage are checked for actual availability.
+- Equipped, bazaar, and other locked stacks are protected.
+- Item identity, slot, quantity, and augment data are rechecked before moving.
+- Only one transfer is outstanding at a time.
+- Matching source and destination count changes must confirm the transfer.
+- A timeout stops the run without automatically retrying an uncertain move.
+- Resting, combat, open menus, zoning, and logout block or stop sorting.
+
+Full destinations are conservatively skipped even if partial-stack space might exist.
+
+Transfer confirmation uses bag counts, not server transaction IDs. Avoid concurrent inventory changes from other addons or manual actions.
+
+## Completion Messages
+
+The completion summary reports:
+
+- Confirmed transfers.
+- Individual item quantities confirmed.
+- Skipped transfers.
+- Protected stacks.
+
+A transfer and an item are not the same count. For example, three transferred stacks may contain 93 individual items.
+
+## Bag Display Order
+
+BagVolley moves items between bags. It does not rearrange the order displayed inside the game’s bag menus.
+
+Use the game’s **Sort → Auto** manually when desired.
+
+The experimental `organize` command was removed because it did not change the displayed order.
+
+## Testing
+
+### Confirmed in live testing
+
+- Single-item transfer into Mog Case.
+- Three-stack transfer containing 93 items.
+- Storage transfer safely skipped outside the Mog House.
+- Successful Storage transfer after returning inside.
+- Successful transfers on all eight test characters.
+- Resting characters blocked from starting.
+
+One character initially reported a startup block after standing up. A later status check showed valid conditions, and the retry succeeded. The original cause was not established.
+
+### Tested offline
+
+- Rule parsing and inventory-first planning.
+- Quantities, wildcards, and conflicting rules.
+- Equipped-item protection.
+- Bag-access and capacity checks.
+- Stale slot, item, augment, and count detection.
+- Transfer failure and timeout handling.
+- Confirmation behavior.
+- Sorting-list clearing and backups using disposable test files.
+
+Not every item, bag type, timing condition, or configuration has been tested. Start with a preview and a small transfer test on your setup.
+
+## Changes in Version 2.0.0
+
+- Added an independent transfer engine.
+- Removed the Itemizer dependency for sorting.
+- Added inventory-first planning to avoid absent-item command spam and delays.
+- Preserved editable lists and solo/group launchers.
+- Included preview, status, cancellation, and backed-up list clearing.
+- Added clearer idle and menu-state diagnostics.
+
+## Author and License
+
+**Author:** Soliserio  
+**License:** MIT
+
+See the included `LICENSE` file for the complete terms.
+
+Itemizer is a separate addon and is not bundled with BagVolley. No Itemizer source is included in this release.
+
+Public API reference: [Windower FFXI Functions](https://github.com/Windower/Lua/wiki/FFXI-Functions)
+
+This project does not imply endorsement by Windower or the Itemizer authors.
